@@ -3,40 +3,59 @@
 // Author      : Sam T
 // Version     :
 // Copyright   : None
-// Description : Mod 1 Critical Thinking CSC450
+// Description : Mod 3 Critical Thinking CSC450
 //============================================================================
 
 #include <iostream>
-#include <string>
 #include <limits>
+
 using namespace std;
-string getString() {
-	// Dynamically allocated array chars
-	// string objects do not require null terminators
-	string s1;
-	string s2;
-	cout << "Please enter in your first string." << endl;
-	// the getline() method includes spaces and consumes the newline char
-	getline(cin, s1);
-	cout << "Please enter in your second string." << endl;
-	getline(cin, s2);
-
-
-
-	return s1 + s2;
-
-}
 
 
 int main(int argc, char **argv) {
 
-	// Iterating loop to run the program three times.
-	for (int i = 0; i < 3; i++) {
-		// Clear the buffer before reading a new string to make sure nothing lingers for the next call.
-		if (i != 0) {
+	// Declare variables
+
+		int num1;
+		int num2;
+		int num3;
+
+
+
+	try {
+		// Get input from the user
+		cout << "Please enter in a three numbers" << endl;
+
+		if (!(cin >> num1 >> num2 >> num3)) {
+			//clear the buffer
+			cin.clear();
+			//ingore the line from any more retreival
 			cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			throw runtime_error("Invalud input, Integers only");
 		}
-		cout << getString() << endl;
+
+
+		int *ptr1 = new int(num1);
+		int *ptr2 = new int(num2);
+		int *ptr3 = new int(num3);
+
+		cout << "The values enter are, " << num1 << "," << num2 << "," << num3 << endl;
+		cout << "The values are dynamically allocated and are stored as: " << *ptr1 << "," << *ptr2 << "," << *ptr3 << endl;
+		cout << "at the memory locations " << &ptr1 << "," << &ptr2 << "," << &ptr3 << endl;
+
+
+
+		delete ptr1;
+		delete ptr2;
+		delete ptr3;
+
+		cout << "Memory has been erased" << endl;
+	} catch (const bad_alloc& e) {
+		cerr << "Bad Allocation: " << e.what() << endl;
+		return 1;
+	} catch (const runtime_error& e) {
+		cerr << "Error: " << e.what() << endl;
+		return 1;
 	}
 
 	return 0;
