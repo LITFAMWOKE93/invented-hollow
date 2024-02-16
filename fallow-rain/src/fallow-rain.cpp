@@ -3,60 +3,81 @@
 // Author      : Sam T
 // Version     :
 // Copyright   : None
-// Description : Mod 3 Critical Thinking CSC450
+// Description : Mod 5 Critical Thinking CSC450
 //============================================================================
 
 #include <iostream>
-#include <limits>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <algorithm>
 
 using namespace std;
 
 
 int main(int argc, char **argv) {
 
-	// Declare variables
-
-		int num1;
-		int num2;
-		int num3;
+	// Create two different streams for I/O operations
+	ofstream outfile;
+	ofstream reverseFile;
 
 
+	outfile.open("CSC450_CT5_mod5.txt", ios_base::app);
 
-	try {
-		// Get input from the user
-		cout << "Please enter in a three numbers" << endl;
-
-		if (!(cin >> num1 >> num2 >> num3)) {
-			//clear the buffer
-			cin.clear();
-			//ingore the line from any more retreival
-			cin.ignore(numeric_limits<streamsize>::max(), '\n');
-			throw runtime_error("Invalud input, Integers only");
-		}
-
-
-		int *ptr1 = new int(num1);
-		int *ptr2 = new int(num2);
-		int *ptr3 = new int(num3);
-
-		cout << "The values enter are, " << num1 << "," << num2 << "," << num3 << endl;
-		cout << "The values are dynamically allocated and are stored as: " << *ptr1 << "," << *ptr2 << "," << *ptr3 << endl;
-		cout << "at the memory locations " << &ptr1 << "," << &ptr2 << "," << &ptr3 << endl;
-
-
-
-		delete ptr1;
-		delete ptr2;
-		delete ptr3;
-
-		cout << "Memory has been erased" << endl;
-	} catch (const bad_alloc& e) {
-		cerr << "Bad Allocation: " << e.what() << endl;
-		return 1;
-	} catch (const runtime_error& e) {
-		cerr << "Error: " << e.what() << endl;
+	if (outfile.fail()) {
+		cout << "File failed to open." << endl;
 		return 1;
 	}
 
+	outfile << "Here is some new text to be appended";
+	// Need to close any stream so that they don't interfere with new ones
+	outfile.close();
+
+	// Now we treat the same file as an input file for reading
+	ifstream infile("CSC450_CT5_mod5.txt");
+
+	// Another file check
+	if (!infile) {
+		cout << "File not found for reading." << endl;
+		return 1;
+	}
+
+	// A string stream object for placing all contents of file into a string, only works on input files.
+	stringstream buffer;
+
+	buffer << infile.rdbuf();
+
+	// Stream can be closed once contents are read.
+	infile.close();
+
+	// Create a string to store buffer contents from file.
+	string file_contents;
+
+	file_contents = buffer.str();
+
+	reverseFile.open("CSC450-mod5-reverse.txt");
+
+	if (reverseFile.fail()) {
+		cout << "File failed to open." << endl;
+		return 1;
+	}
+
+	reverse(file_contents.begin(), file_contents.end());
+	// Built in string reverse method from the algorithm header
+
+	reverseFile << file_contents << endl;
+
+	// Always close streams
+	reverseFile.close();
+
+
+
+
+
+
+
+
 	return 0;
 }
+
+
