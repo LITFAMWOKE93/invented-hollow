@@ -3,81 +3,54 @@
 // Author      : Sam T
 // Version     :
 // Copyright   : None
-// Description : Mod 5 Critical Thinking CSC450
+// Description : Mod 7 Portfolio Milestone CSC450
 //============================================================================
 
 #include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <algorithm>
+#include <thread>
+#include <mutex>
+#include <condition_variable> // Similar to a semaphore
+
 
 using namespace std;
 
+mutex mtx; // Mutex for critical section control
+condition_variable cv; // Synchronization var
+bool ready = false; // Control variable flag
 
-int main(int argc, char **argv) {
+void countUp() {
+    for (int i = 1; i <= 20; ++i) {
+        lock_guard<mutex> lock(mtx); // Release lock when out of scope
 
-	// Create two different streams for I/O operations
-	ofstream outfile;
-	ofstream reverseFile;
+        cout << "Count Up: " << i << endl;
+        this_thread::sleep_for(chrono::milliseconds(100)); // Slow down the counting for visibility
+    }
+    ready = true; // Thread says I am done now
+    cv.notify_one(); // Let the waiting thread know it has access
+    cout << "Thread 1 is done, now " << endl;
+}
 
+void countDown() {
+	unique_lock<mutex> lock(mtx);
+	cv.wait(lock, []{return ready;}); // Listening for ready flag
+	lock.unlock(); // Unlock to start countdown
+	cout << "unlocking thread 2" << endl;
+    for (int i = 20; i > 0; --i) {
+        lock_guard<mutex> lg(mtx); // Re lock to do output
+        cout << "Count Down: " << i << endl;
+        this_thread::sleep_for(chrono::milliseconds(100));
+    }
+}
 
-	outfile.open("CSC450_CT5_mod5.txt", ios_base::app);
-
-	if (outfile.fail()) {
-		cout << "File failed to open." << endl;
-		return 1;
-	}
-
-	outfile << "Here is some new text to be appended";
-	// Need to close any stream so that they don't interfere with new ones
-	outfile.close();
-
-	// Now we treat the same file as an input file for reading
-	ifstream infile("CSC450_CT5_mod5.txt");
-
-	// Another file check
-	if (!infile) {
-		cout << "File not found for reading." << endl;
-		return 1;
-	}
-
-	// A string stream object for placing all contents of file into a string, only works on input files.
-	stringstream buffer;
-
-	buffer << infile.rdbuf();
-
-	// Stream can be closed once contents are read.
-	infile.close();
-
-	// Create a string to store buffer contents from file.
-	string file_contents;
-
-	file_contents = buffer.str();
-
-	reverseFile.open("CSC450-mod5-reverse.txt");
-
-	if (reverseFile.fail()) {
-		cout << "File failed to open." << endl;
-		return 1;
-	}
-
-	reverse(file_contents.begin(), file_contents.end());
-	// Built in string reverse method from the algorithm header
-
-	reverseFile << file_contents << endl;
-
-	// Always close streams
-	reverseFile.close();
+int main() {
+    thread t1(countUp);
+    thread t2(countDown);
 
 
+    t1.join(); // Wait for the count up to finish
+    t2.join();
 
-
-
-
-
-
-	return 0;
+    return 0;
 }
 
 
